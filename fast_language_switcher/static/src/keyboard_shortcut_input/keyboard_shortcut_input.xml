@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="fast_language_switcher.KeyboardShortcutInput">
+        <div
+            class="o_fls_shortcut_widget d-inline-flex align-items-center gap-1"
+            t-att-class="{
+                'o_fls_shortcut_capturing': state.capturing,
+                'o_fls_shortcut_readonly': props.readonly,
+            }"
+            tabindex="0"
+            t-on-click="onClick"
+            t-on-keydown="onKeyDown"
+            t-on-blur="onBlur"
+        >
+            <t t-if="state.capturing">
+                <span class="o_fls_shortcut_hint fst-italic text-muted">
+                    Press a key combination…
+                </span>
+            </t>
+            <t t-else="">
+                <t t-if="displayParts.length">
+                    <t t-foreach="displayParts" t-as="part" t-key="part_index">
+                        <t t-if="part_index > 0">
+                            <span class="o_fls_shortcut_sep text-muted">+</span>
+                        </t>
+                        <kbd class="o_fls_shortcut_key" t-esc="part"/>
+                    </t>
+                </t>
+                <t t-else="">
+                    <span class="fst-italic text-muted">No shortcut set</span>
+                </t>
+                <t t-if="!props.readonly">
+                    <span class="o_fls_shortcut_edit_hint text-muted small ms-2">(click to change)</span>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

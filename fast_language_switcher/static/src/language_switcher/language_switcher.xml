@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--
+        Systray entry: flag icon + dropdown list of installed languages.
+        The macOS-style shortcut wizard is rendered via t-portal into <body>.
+    -->
+    <t t-name="fast_language_switcher.LanguageSwitcher">
+        <div class="o_fls_systray_item d-flex align-items-center bg-inherit">
+
+            <!-- ── Dropdown (click) ──────────────────────────────────────── -->
+            <DropdownGroup group="'web-navbar-group'">
+                <Dropdown>
+                    <!-- Trigger button -->
+                    <button
+                        class="o_fls_trigger btn d-flex align-items-center gap-1 py-1 px-2"
+                        t-att-title="currentLang ? currentLang.name : 'Language'"
+                    >
+                        <span class="o_fls_flag fs-5 lh-1" t-esc="currentLang ? currentLang.flag : '🌐'"/>
+                        <span
+                            class="o_fls_code d-none d-lg-inline small fw-semibold lh-1"
+                            t-esc="currentLang ? currentLang.shortLabel : ''"
+                        />
+                    </button>
+
+                    <!-- Dropdown content -->
+                    <t t-set-slot="content">
+                        <div class="o_fls_dropdown_menu">
+                            <div class="o_fls_dropdown_header px-3 py-2 text-muted small">
+                                Select Language
+                            </div>
+                            <t t-foreach="state.languages" t-as="lang" t-key="lang.code">
+                                <div
+                                    class="o_fls_dropdown_item dropdown-item d-flex align-items-center gap-2 py-2 px-3"
+                                    t-att-class="{ 'o_fls_active': lang.code === state.currentCode }"
+                                    t-on-click="() => this.onDropdownSelect(lang)"
+                                >
+                                    <span class="o_fls_item_flag fs-5 lh-1 flex-shrink-0" t-esc="lang.flag"/>
+                                    <span class="o_fls_item_name flex-grow-1" t-esc="lang.name"/>
+                                    <i
+                                        t-if="lang.code === state.currentCode"
+                                        class="fa fa-check text-primary ms-2"
+                                    />
+                                </div>
+                            </t>
+                            <!-- Dynamic shortcut hint -->
+                            <div class="o_fls_dropdown_footer px-3 py-2 border-top text-muted small text-center">
+                                <t t-foreach="shortcutDisplay" t-as="part" t-key="part_index">
+                                    <t t-if="part_index > 0">+</t><kbd t-esc="part"/>
+                                </t>
+                                to switch quickly
+                            </div>
+                        </div>
+                    </t>
+                </Dropdown>
+            </DropdownGroup>
+
+            <!-- ── macOS-style shortcut wizard (portal into body) ───────── -->
+            <t t-if="state.showWizard" t-portal="'body'">
+                <!-- Semi-transparent backdrop -->
+                <div
+                    class="o_fls_wizard_backdrop"
+                    t-on-click="onWizardBackdropClick"
+                />
+
+                <!-- Floating panel -->
+                <div class="o_fls_wizard" role="dialog" aria-label="Language Switcher">
+                    <div class="o_fls_wizard_title">Switch Language</div>
+
+                    <div class="o_fls_wizard_list">
+                        <t t-foreach="state.languages" t-as="lang" t-key="lang.code">
+                            <div
+                                class="o_fls_wizard_item"
+                                t-att-class="{
+                                    'o_fls_wizard_selected': lang_index === state.wizardIndex,
+                                    'o_fls_wizard_current': lang.code === state.currentCode,
+                                }"
+                                t-on-click="() => this.onWizardItemClick(lang)"
+                            >
+                                <span class="o_fls_wizard_flag" t-esc="lang.flag"/>
+                                <div class="o_fls_wizard_info">
+                                    <span class="o_fls_wizard_name" t-esc="lang.name"/>
+                                    <span
+                                        t-if="lang.code === state.currentCode"
+                                        class="o_fls_wizard_badge"
+                                    >active</span>
+                                </div>
+                                <i
+                                    t-if="lang_index === state.wizardIndex"
+                                    class="o_fls_wizard_arrow fa fa-chevron-right"
+                                />
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Dynamic hints -->
+                    <div class="o_fls_wizard_hint">
+                        <span>
+                            <t t-foreach="shortcutDisplay" t-as="part" t-key="part_index">
+                                <t t-if="part_index > 0">+</t><kbd t-esc="part"/>
+                            </t>
+                            cycle
+                        </span>
+                        <span>Release <kbd t-esc="primaryModifierDisplay"/> to apply</span>
+                        <span>Click to select</span>
+                        <span><kbd>Esc</kbd> cancel</span>
+                    </div>
+                </div>
+            </t>
+
+        </div>
+    </t>
+
+</templates>

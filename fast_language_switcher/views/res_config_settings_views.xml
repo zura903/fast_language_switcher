@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_fast_language_switcher" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.fast_language_switcher</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Fast Language Switcher" name="fast_language_switcher">
+                    <block title="Keyboard Shortcut">
+                        <setting
+                            string="Language Switcher Shortcut"
+                            help="Keyboard shortcut to open the floating language picker. Click the field and press a key combination to record a new shortcut. Default: Ctrl+L"
+                        >
+                            <field name="language_switcher_shortcut" widget="keyboard_shortcut"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

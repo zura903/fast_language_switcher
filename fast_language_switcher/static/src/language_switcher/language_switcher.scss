@@ -1,0 +1,231 @@
+// ============================================================================
+// Fast Language Switcher – styles
+// ============================================================================
+
+// ── Systray trigger button ───────────────────────────────────────────────────
+
+.o_fls_systray_item {
+    .o_fls_trigger {
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        color: inherit;
+        transition: background 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+        }
+
+        .o_fls_flag {
+            line-height: 1;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+        }
+    }
+}
+
+// ── Click-dropdown ───────────────────────────────────────────────────────────
+
+.o_fls_dropdown_menu {
+    min-width: 220px;
+
+    .o_fls_dropdown_header {
+        border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+
+    .o_fls_dropdown_item {
+        cursor: pointer;
+        transition: background 0.1s ease;
+
+        &:hover {
+            background: var(--bs-primary-bg-subtle, #e8f4fd);
+        }
+
+        &.o_fls_active {
+            background: var(--bs-primary-bg-subtle, #e8f4fd);
+            font-weight: 600;
+        }
+
+        .o_fls_item_flag {
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+        }
+    }
+
+    .o_fls_dropdown_footer {
+        font-size: 0.72rem;
+
+        kbd {
+            background: var(--bs-secondary-bg, #f8f9fa);
+            border: 1px solid var(--bs-border-color, #dee2e6);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 0.68rem;
+            font-family: inherit;
+        }
+    }
+}
+
+// ── macOS-style Ctrl+L wizard ────────────────────────────────────────────────
+
+.o_fls_wizard_backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1999;
+    // Subtle darkening – doesn't fully block the UI
+    background: rgba(0, 0, 0, 0.25);
+    animation: o_fls_fade_in 0.12s ease forwards;
+}
+
+.o_fls_wizard {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+
+    // frosted-glass dark panel (macOS look)
+    background: rgba(28, 28, 30, 0.88);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+
+    padding: 20px 16px 16px;
+    min-width: 300px;
+    max-width: 420px;
+    color: #fff;
+
+    animation: o_fls_wizard_pop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+    // ── Title ────────────────────────────────────────────────────────────────
+
+    .o_fls_wizard_title {
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 14px;
+    }
+
+    // ── Language list ─────────────────────────────────────────────────────────
+
+    .o_fls_wizard_list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .o_fls_wizard_item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.1s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        // The item highlighted by Ctrl+L cycling
+        &.o_fls_wizard_selected {
+            background: rgba(10, 132, 255, 0.35);  // macOS blue tint
+            border: 1px solid rgba(10, 132, 255, 0.55);
+
+            .o_fls_wizard_name {
+                font-weight: 700;
+            }
+        }
+    }
+
+    .o_fls_wizard_flag {
+        font-size: 2rem;
+        line-height: 1;
+        flex-shrink: 0;
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    }
+
+    .o_fls_wizard_info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .o_fls_wizard_name {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .o_fls_wizard_badge {
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(10, 132, 255, 0.85);
+        background: rgba(10, 132, 255, 0.18);
+        border-radius: 4px;
+        padding: 1px 6px;
+        align-self: flex-start;
+    }
+
+    .o_fls_wizard_arrow {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    // ── Hint bar ──────────────────────────────────────────────────────────────
+
+    .o_fls_wizard_hint {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 0.68rem;
+        color: rgba(255, 255, 255, 0.38);
+
+        kbd {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: inherit;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.65);
+        }
+    }
+}
+
+// ── Animations ───────────────────────────────────────────────────────────────
+
+@keyframes o_fls_fade_in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes o_fls_wizard_pop {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.88);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}

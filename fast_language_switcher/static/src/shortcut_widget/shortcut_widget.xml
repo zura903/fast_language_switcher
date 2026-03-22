@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="fast_language_switcher.ShortcutInput">
+        <div class="o_fls_shortcut_input d-flex align-items-center gap-2 flex-wrap">
+
+            <!-- Current shortcut display -->
+            <div class="o_fls_shortcut_display d-flex align-items-center gap-1">
+                <t t-if="state.recording">
+                    <span class="text-muted fst-italic">Press keys…</span>
+                </t>
+                <t t-else="">
+                    <t t-foreach="shortcutParts" t-as="part" t-key="part">
+                        <kbd t-esc="part"/>
+                        <span t-if="!part_last" class="fw-semibold text-muted small">+</span>
+                    </t>
+                </t>
+            </div>
+
+            <!-- Action buttons -->
+            <button
+                t-if="!state.recording"
+                type="button"
+                class="btn btn-sm btn-secondary"
+                t-on-click.stop="startRecording"
+            >Change</button>
+
+            <button
+                t-if="state.recording"
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                t-on-click.stop="cancelRecording"
+            >Cancel</button>
+
+        </div>
+    </t>
+
+</templates>

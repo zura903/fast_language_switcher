@@ -20,6 +20,7 @@
     "data": [
         "views/res_config_settings_views.xml",
     ],
+    'images': ['static/description/banner.svg'],
     "assets": {
         "web.assets_backend": [
             "fast_language_switcher/static/src/shortcut_widget/shortcut_widget.js",

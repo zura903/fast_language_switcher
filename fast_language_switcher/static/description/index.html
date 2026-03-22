@@ -1,876 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fast Language Switcher — Odoo Module</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0b0e14;
-      --surface: #111620;
-      --surface2: #181e2c;
-      --border: rgba(255,255,255,0.07);
-      --border-bright: rgba(255,255,255,0.14);
-      --accent: #4f8ef7;
-      --accent2: #a78bfa;
-      --accent3: #34d399;
-      --text: #e8edf5;
-      --muted: #6b7a96;
-      --dim: #3a4560;
-      --radius: 14px;
-      --radius-sm: 8px;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      line-height: 1.65;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE TEXTURE ───────────────────────────────── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: .45;
-    }
-
-    /* ── GRID ACCENT ─────────────────────────────────── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(79,142,247,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(79,142,247,.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    main { position: relative; z-index: 1; }
-
-    /* ── NAV ─────────────────────────────────────────── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 40px;
-      height: 60px;
-      background: rgba(11,14,20,.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-brand {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 15px;
-      letter-spacing: .02em;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-brand .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 2.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50% { opacity: .5; transform: scale(.75); }
-    }
-
-    .nav-pills { display: flex; gap: 6px; }
-
-    .pill {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 400;
-      padding: 4px 10px;
-      border-radius: 99px;
-      border: 1px solid var(--border-bright);
-      color: var(--muted);
-      background: var(--surface);
-      white-space: nowrap;
-    }
-
-    .pill.v { color: var(--accent3); border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.07); }
-
-    /* ── HERO ────────────────────────────────────────── */
-    .hero {
-      padding: 100px 40px 80px;
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    .hero-eyebrow {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .hero-eyebrow::before {
-      content: '';
-      display: block;
-      width: 28px; height: 1px;
-      background: var(--accent);
-      opacity: .6;
-    }
-
-    h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(44px, 6vw, 72px);
-      font-weight: 800;
-      line-height: 1.04;
-      letter-spacing: -.02em;
-      margin-bottom: 28px;
-    }
-
-    h1 em {
-      font-style: normal;
-      background: linear-gradient(110deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-desc {
-      font-size: 17px;
-      color: var(--muted);
-      max-width: 540px;
-      margin-bottom: 44px;
-      font-weight: 300;
-      line-height: 1.75;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 26px;
-      border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .2s ease;
-      text-decoration: none;
-      border: none;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 0 28px rgba(79,142,247,.3);
-    }
-
-    .btn-primary:hover {
-      background: #6aa3ff;
-      box-shadow: 0 0 40px rgba(79,142,247,.5);
-      transform: translateY(-1px);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border-bright);
-    }
-
-    .btn-ghost:hover {
-      color: var(--text);
-      border-color: rgba(255,255,255,.25);
-      background: rgba(255,255,255,.04);
-    }
-
-    /* ── COMPAT BADGES ───────────────────────────────── */
-    .compat {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-top: 40px;
-      padding-top: 40px;
-      border-top: 1px solid var(--border);
-    }
-
-    .compat-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--dim);
-      letter-spacing: .06em;
-      margin-right: 4px;
-    }
-
-    .badge {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      padding: 4px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border-bright);
-      color: var(--text);
-      background: var(--surface);
-    }
-
-    /* ── SECTION ─────────────────────────────────────── */
-    section {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 0 40px 80px;
-    }
-
-    h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 28px;
-    }
-
-    /* ── FEATURES GRID ───────────────────────────────── */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 80px;
-    }
-
-    .feature {
-      background: var(--surface);
-      padding: 28px 26px;
-      transition: background .2s;
-    }
-
-    .feature:hover { background: var(--surface2); }
-
-    .feature-icon {
-      font-size: 22px;
-      margin-bottom: 14px;
-      display: block;
-    }
-
-    .feature-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .feature-desc {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── KEYBOARD DEMO ───────────────────────────────── */
-    .kbd-demo {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 36px;
-      margin-bottom: 80px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .kbd-demo::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 220px; height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(167,139,250,.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .kbd-demo-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .kbd-demo-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 28px;
-    }
-
-    .shortcut-flow {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .flow-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-    }
-
-    .flow-num {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--accent);
-      min-width: 18px;
-      margin-top: 2px;
-    }
-
-    .flow-text {
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    kbd {
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 3px 8px;
-      border-radius: 5px;
-      border: 1px solid var(--border-bright);
-      background: var(--surface2);
-      color: var(--text);
-      box-shadow: 0 2px 0 rgba(0,0,0,.4);
-      vertical-align: middle;
-    }
-
-    /* ── INSTALL STEPS ───────────────────────────────── */
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 80px;
-    }
-
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      padding: 22px 26px;
-      background: var(--surface);
-      transition: background .2s;
-    }
-
-    .step:hover { background: var(--surface2); }
-
-    .step-n {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--accent);
-      min-width: 24px;
-      padding-top: 2px;
-    }
-
-    .step-body { flex: 1; }
-
-    .step-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .step-desc {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    code {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      background: rgba(79,142,247,.1);
-      color: #93bbff;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
-    /* ── STRUCTURE TABLE ─────────────────────────────── */
-    .file-tree {
-      font-family: 'DM Mono', monospace;
-      font-size: 12.5px;
-      line-height: 2;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 32px;
-      margin-bottom: 80px;
-      overflow-x: auto;
-    }
-
-    .file-tree .dir { color: var(--accent); }
-    .file-tree .file { color: var(--text); }
-    .file-tree .comment { color: var(--dim); font-size: 11.5px; }
-
-    /* ── SETTINGS TABLE ──────────────────────────────── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13.5px;
-      margin-bottom: 80px;
-    }
-
-    th {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--dim);
-      font-weight: 400;
-      text-align: left;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      vertical-align: top;
-    }
-
-    td:first-child { color: var(--text); }
-
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--surface2); }
-
-    /* ── FAQ ─────────────────────────────────────────── */
-    .faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 80px;
-    }
-
-    .faq-item {
-      background: var(--surface);
-      padding: 24px 28px;
-      transition: background .2s;
-    }
-
-    .faq-item:hover { background: var(--surface2); }
-
-    .faq-q {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 8px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .faq-q::before {
-      content: 'Q';
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      background: rgba(79,142,247,.15);
-      color: var(--accent);
-      border-radius: 4px;
-      padding: 2px 6px;
-      margin-top: 1px;
-      flex-shrink: 0;
-    }
-
-    .faq-a {
-      font-size: 13.5px;
-      color: var(--muted);
-      padding-left: 34px;
-    }
-
-    /* ── CHANGELOG ───────────────────────────────────── */
-    .changelog {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      margin-bottom: 80px;
-    }
-
-    .release {
-      display: flex;
-      gap: 24px;
-    }
-
-    .release-ver {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--accent2);
-      padding-top: 3px;
-      white-space: nowrap;
-      min-width: 80px;
-    }
-
-    .release-items {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .release-item {
-      font-size: 13.5px;
-      color: var(--muted);
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .release-item::before {
-      content: '→';
-      color: var(--dim);
-      flex-shrink: 0;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      margin-top: 2px;
-    }
-
-    /* ── FOOTER ──────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 36px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .footer-left {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--dim);
-    }
-
-    .footer-left strong { color: var(--muted); font-weight: 400; }
-
-    .footer-license {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--dim);
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .footer-license::before {
-      content: '⚖';
-      font-size: 13px;
-    }
-
-    /* ── SCROLLBAR ───────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 99px; }
-
-    @media (max-width: 600px) {
-      nav { padding: 0 20px; }
-      .hero { padding: 60px 20px 60px; }
-      section { padding: 0 20px 60px; }
-      footer { padding: 28px 20px; flex-direction: column; }
-      .release { flex-direction: column; gap: 8px; }
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #212529;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 24px;
+            line-height: 1.6;
+        }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
+        h2 { font-size: 1.25rem; font-weight: 600; margin-top: 2rem; border-bottom: 2px solid #e9ecef; padding-bottom: 6px; }
+        .tagline { font-size: 1.05rem; color: #6c757d; margin-bottom: 2rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 1.5rem 0; }
+        .feature-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 18px;
+            background: #f8f9fa;
+        }
+        .feature-card .icon { font-size: 2rem; margin-bottom: 10px; }
+        .feature-card h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; }
+        .feature-card p { font-size: 0.9rem; color: #495057; margin: 0; }
+        kbd {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 0.85em;
+            font-family: inherit;
+        }
+        .steps { padding-left: 1.25rem; }
+        .steps li { margin-bottom: 8px; }
+        .note {
+            background: #e8f4fd;
+            border-left: 4px solid #0d6efd;
+            border-radius: 0 6px 6px 0;
+            padding: 12px 16px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid #dee2e6; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .badge {
+            display: inline-block;
+            background: #0d6efd;
+            color: #fff;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
-<main>
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-brand">
-      <span class="dot"></span>
-      Fast Language Switcher
+<h1>🌐 Fast Language Switcher</h1>
+<p class="tagline">
+    A sleek systray language switcher for Odoo 18 with emoji flags and a configurable keyboard shortcut.
+</p>
+
+<h2>Overview</h2>
+<p>
+    <strong>Fast Language Switcher</strong> adds a compact flag icon to your Odoo navigation bar.
+    Click it to choose a language from a dropdown, or use a keyboard shortcut (default <kbd>Ctrl</kbd>+<kbd>L</kbd>)
+    to open a macOS-style floating picker and cycle through languages without touching the mouse.
+    The shortcut is fully configurable from General Settings.
+</p>
+
+<h2>Key Features</h2>
+<div class="features">
+    <div class="feature-card">
+        <div class="icon">🏳️</div>
+        <h3>Flag Icons in Systray</h3>
+        <p>Country flag emoji for the active language is always visible in the top navigation bar.</p>
     </div>
-    <div class="nav-pills">
-      <span class="pill v">v1.1.0</span>
-      <span class="pill">LGPL-3</span>
-      <span class="pill">Odoo 17 · 18 · 19</span>
+    <div class="feature-card">
+        <div class="icon">🖱️</div>
+        <h3>Click Dropdown</h3>
+        <p>Click the flag to open a clean dropdown listing all installed languages with a checkmark on the active one.</p>
     </div>
-  </nav>
-
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-eyebrow">Odoo Module · Tools</div>
-    <h1>Switch language.<br /><em>Instantly.</em></h1>
-    <p class="hero-desc">
-      A flag-based language picker that lives in the Odoo top bar.
-      One click or one keyboard shortcut — no page navigation, no friction.
-    </p>
-    <div class="hero-cta">
-      <a href="#install" class="btn btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
-        Installation
-      </a>
-      <a href="#config" class="btn btn-ghost">Configuration →</a>
+    <div class="feature-card">
+        <div class="icon">⌨️</div>
+        <h3>Keyboard Shortcut</h3>
+        <p>Press the configured shortcut (default <kbd>Ctrl</kbd>+<kbd>L</kbd>) to open a floating language picker and cycle languages.</p>
     </div>
-
-    <div class="compat">
-      <span class="compat-label">COMPAT</span>
-      <span class="badge">Odoo 17.0</span>
-      <span class="badge">Odoo 18.0</span>
-      <span class="badge">Odoo 19.0</span>
+    <div class="feature-card">
+        <div class="icon">⚙️</div>
+        <h3>Configurable Shortcut</h3>
+        <p>Change the shortcut any time in <strong>Settings → General Settings → Fast Language Switcher</strong>. Click to record a new key combination.</p>
     </div>
-  </div>
-
-  <!-- FEATURES -->
-  <section>
-    <h2>Features</h2>
-    <div class="features">
-      <div class="feature">
-        <span class="feature-icon">🏳️</span>
-        <div class="feature-title">Flag in Systray</div>
-        <p class="feature-desc">Active language flag and short code always visible next to the user avatar.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🖱️</span>
-        <div class="feature-title">Click Dropdown</div>
-        <p class="feature-desc">Click the flag to open a clean list of all installed languages.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">⌨️</span>
-        <div class="feature-title">Keyboard Overlay</div>
-        <p class="feature-desc">Press your shortcut to open a macOS-style floating picker and cycle languages.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">⚙️</span>
-        <div class="feature-title">Configurable Shortcut</div>
-        <p class="feature-desc">Set any <code>modifier + key</code> combo from General Settings — captured live, no typing.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🔄</span>
-        <div class="feature-title">Cycle with Keyboard</div>
-        <p class="feature-desc">Each press advances the highlight; release the modifier to apply instantly.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">🌐</span>
-        <div class="feature-title">Flag Derivation</div>
-        <p class="feature-desc">Flags are auto-derived from ISO territory codes (e.g. <code>fr_FR</code> → 🇫🇷).</p>
-      </div>
+    <div class="feature-card">
+        <div class="icon">✨</div>
+        <h3>macOS-style Wizard</h3>
+        <p>Frosted-glass floating panel with smooth animations. Release the modifier key to apply, or press Esc to cancel.</p>
     </div>
-  </section>
-
-  <!-- INSTALL -->
-  <section id="install">
-    <h2>Installation</h2>
-    <div class="steps">
-      <div class="step">
-        <span class="step-n">01</span>
-        <div class="step-body">
-          <div class="step-title">Copy the module</div>
-          <p class="step-desc">Place the <code>fast_language_switcher</code> folder into your Odoo <code>addons</code> path, or a custom addons path defined in <code>odoo.conf</code>.</p>
-        </div>
-      </div>
-      <div class="step">
-        <span class="step-n">02</span>
-        <div class="step-body">
-          <div class="step-title">Restart the server</div>
-          <p class="step-desc">Restart the Odoo server process so it discovers the new module directory.</p>
-        </div>
-      </div>
-      <div class="step">
-        <span class="step-n">03</span>
-        <div class="step-body">
-          <div class="step-title">Install from Apps</div>
-          <p class="step-desc">Go to <strong>Settings → Apps</strong>, search <strong>Fast Language Switcher</strong>, and click <strong>Install</strong>.</p>
-        </div>
-      </div>
-      <div class="step">
-        <span class="step-n">04</span>
-        <div class="step-body">
-          <div class="step-title">Add a second language</div>
-          <p class="step-desc">At least two languages must be installed (<strong>Settings → Translations → Languages</strong>) for switching to be useful.</p>
-        </div>
-      </div>
+    <div class="feature-card">
+        <div class="icon">📱</div>
+        <h3>Responsive</h3>
+        <p>Language code label hides on small screens; the flag icon always stays visible.</p>
     </div>
-  </section>
+</div>
 
-  <!-- CONFIG -->
-  <section id="config">
-    <h2>Configuration</h2>
-    <div class="kbd-demo">
-      <div class="kbd-demo-title">Changing the keyboard shortcut</div>
-      <div class="kbd-demo-sub">Default shortcut is <kbd>Ctrl</kbd><kbd>L</kbd></div>
-      <div class="shortcut-flow">
-        <div class="flow-step"><span class="flow-num">1.</span><span class="flow-text">Open <strong>Settings → General Settings</strong></span></div>
-        <div class="flow-step"><span class="flow-num">2.</span><span class="flow-text">Scroll to the <strong>Fast Language Switcher</strong> section</span></div>
-        <div class="flow-step"><span class="flow-num">3.</span><span class="flow-text">Click <strong>Change</strong> next to <em>Keyboard Shortcut</em></span></div>
-        <div class="flow-step"><span class="flow-num">4.</span><span class="flow-text">Press your desired combo — e.g. <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>L</kbd> or <kbd>Alt</kbd><kbd>L</kbd> — it's captured automatically</span></div>
-        <div class="flow-step"><span class="flow-num">5.</span><span class="flow-text">Click <strong>Save</strong></span></div>
-      </div>
-    </div>
+<h2>How to Use</h2>
 
-    <table>
-      <thead><tr><th>Rule</th><th>Detail</th></tr></thead>
-      <tbody>
-        <tr><td>Modifier required</td><td>Must include <code>Ctrl</code>, <code>Alt</code>, <code>Meta</code> (⌘), or <code>Shift</code></td></tr>
-        <tr><td>Non-modifier key</td><td>One letter, digit, or function key</td></tr>
-        <tr><td>Storage format</td><td>Lowercase <code>+</code>-separated string, e.g. <code>ctrl+l</code></td></tr>
-        <tr><td>System parameter key</td><td><code>fast_language_switcher.shortcut</code></td></tr>
-      </tbody>
-    </table>
-  </section>
+<h3>Click-based switching</h3>
+<ol class="steps">
+    <li>Click the flag icon in the top navigation bar.</li>
+    <li>Choose any active language from the dropdown list.</li>
+    <li>The page reloads with the selected language applied.</li>
+</ol>
 
-  <!-- USAGE -->
-  <section id="usage">
-    <h2>Usage</h2>
-    <div class="features" style="margin-bottom:80px">
-      <div class="feature">
-        <span class="feature-icon">🖱️</span>
-        <div class="feature-title">Click (Dropdown)</div>
-        <p class="feature-desc">Click the flag icon in the systray → a dropdown lists all active languages → click any to switch immediately.</p>
-      </div>
-      <div class="feature">
-        <span class="feature-icon">⌨️</span>
-        <div class="feature-title">Keyboard (Overlay)</div>
-        <p class="feature-desc">Press <kbd>Ctrl</kbd><kbd>L</kbd> to open the floating overlay. Press again to cycle. Release modifier to apply. <kbd>Esc</kbd> or backdrop click to cancel.</p>
-      </div>
-    </div>
-  </section>
+<h3>Keyboard shortcut switching (default: Ctrl+L)</h3>
+<ol class="steps">
+    <li>Press <kbd>Ctrl</kbd>+<kbd>L</kbd> — a floating picker opens with the next language pre-selected.</li>
+    <li>Press the shortcut again to cycle to the next language.</li>
+    <li>Release <kbd>Ctrl</kbd> to apply the highlighted language, <strong>or</strong> click any language in the list.</li>
+    <li>Press <kbd>Esc</kbd> to close the picker without switching.</li>
+</ol>
 
-  <!-- STRUCTURE -->
-  <section>
-    <h2>Module Structure</h2>
-    <div class="file-tree">
-<span class="dir">fast_language_switcher/</span>
-├── <span class="file">__init__.py</span>
-├── <span class="file">__manifest__.py</span>
-├── <span class="dir">models/</span>
-│   ├── <span class="file">__init__.py</span>
-│   └── <span class="file">res_config_settings.py</span>      <span class="comment"># fls_shortcut field</span>
-├── <span class="dir">views/</span>
-│   └── <span class="file">res_config_settings_views.xml</span>   <span class="comment"># General Settings injection</span>
-└── <span class="dir">static/src/</span>
-    ├── <span class="dir">shortcut_widget/</span>
-    │   ├── <span class="file">shortcut_widget.js</span>      <span class="comment"># Owl field widget</span>
-    │   └── <span class="file">shortcut_widget.xml</span>
-    └── <span class="dir">language_switcher/</span>
-        ├── <span class="file">language_switcher.js</span>    <span class="comment"># Main systray Owl component</span>
-        ├── <span class="file">language_switcher.xml</span>
-        └── <span class="file">language_switcher.scss</span>  <span class="comment"># Frosted-glass overlay, dropdown</span>
-    </div>
-  </section>
+<div class="note">
+    <strong>Tip:</strong> The shortcut can be customised. Go to <strong>Settings → General Settings → Fast Language Switcher</strong>,
+    click the shortcut field, and press your preferred key combination (e.g. <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> or <kbd>Alt</kbd>+<kbd>L</kbd>).
+</div>
 
-  <!-- DEPENDENCIES -->
-  <section>
-    <h2>Dependencies</h2>
-    <table>
-      <thead><tr><th>Module</th><th>Reason</th></tr></thead>
-      <tbody>
-        <tr><td><code>web</code></td><td>Owl component system, systray registry, ORM service</td></tr>
-        <tr><td><code>base_setup</code></td><td>General Settings form view — injects the shortcut configuration block</td></tr>
-      </tbody>
-    </table>
-  </section>
+<h2>Configuration</h2>
+<p>Navigate to <strong>Settings → General Settings</strong> and scroll to the <em>Fast Language Switcher</em> section.</p>
+<table>
+    <thead>
+        <tr><th>Setting</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Language Switcher Shortcut</td>
+            <td><kbd>Ctrl</kbd>+<kbd>L</kbd></td>
+            <td>
+                Keyboard shortcut to open the floating language picker.
+                Click the field and press a new combination to change it.
+                Supported modifiers: <kbd>Ctrl</kbd>, <kbd>Alt</kbd>, <kbd>Shift</kbd>, <kbd>Meta</kbd>.
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-  <!-- FAQ -->
-  <section>
-    <h2>FAQ</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-q">The shortcut conflicts with my browser.</div>
-        <p class="faq-a">Change it in General Settings to a combo your browser doesn't reserve, e.g. <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>L</kbd> or <kbd>Alt</kbd><kbd>L</kbd>.</p>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">The overlay shows the wrong shortcut hint.</div>
-        <p class="faq-a">After saving a new shortcut, hard-reload with <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>R</kbd> / <kbd>Cmd</kbd><kbd>Shift</kbd><kbd>R</kbd> to clear the asset cache.</p>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">Only one language appears in the list.</div>
-        <p class="faq-a">Install additional languages via <strong>Settings → Translations → Activate a Language</strong> (Odoo 16+) or <strong>Settings → Translations → Languages</strong>.</p>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q">The flag shows 🌐 instead of a proper flag.</div>
-        <p class="faq-a">Flags are derived from the ISO territory code (e.g. <code>fr_FR</code> → 🇫🇷). Languages with only a two-letter code and no territory, like <code>en</code>, fall back to the globe emoji.</p>
-      </div>
-    </div>
-  </section>
+<h2>Requirements</h2>
+<table>
+    <thead>
+        <tr><th>Requirement</th><th>Version</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Odoo</td><td>18.0</td></tr>
+        <tr><td>Python</td><td>3.10+</td></tr>
+        <tr><td>Browser</td><td>Any modern browser (Chrome, Firefox, Edge, Safari)</td></tr>
+    </tbody>
+</table>
 
-  <!-- CHANGELOG -->
-  <section>
-    <h2>Changelog</h2>
-    <div class="changelog">
-      <div class="release">
-        <span class="release-ver">19.0.1.0.1</span>
-        <div class="release-items">
-          <div class="release-item">Configurable keyboard shortcut via <code>res.config.settings</code></div>
-          <div class="release-item"><code>fls_shortcut_input</code> Owl field widget for live key capture</div>
-          <div class="release-item">Shortcut hint in overlay and dropdown footer reflects configured shortcut dynamically</div>
-          <div class="release-item">Generalised modifier-release detection to support non-Ctrl shortcuts</div>
-        </div>
-      </div>
-      <div class="release">
-        <span class="release-ver">19.0.1.0.0</span>
-        <div class="release-items">
-          <div class="release-item">Initial release</div>
-          <div class="release-item">Flag icon in systray with click dropdown</div>
-          <div class="release-item"><kbd>Ctrl</kbd><kbd>L</kbd> keyboard shortcut with cycling overlay</div>
-        </div>
-      </div>
-    </div>
-  </section>
+<h2>Installation</h2>
+<ol class="steps">
+    <li>Copy the <code>fast_language_switcher</code> folder into your Odoo addons directory.</li>
+    <li>Restart the Odoo server.</li>
+    <li>Go to <strong>Apps</strong>, search for <em>Fast Language Switcher</em>, and click <strong>Install</strong>.</li>
+    <li>Ensure at least two languages are installed and active under <strong>Settings → Translations → Languages</strong>.</li>
+</ol>
 
-</main>
+<h2>Keyboard Shortcut Reference</h2>
+<table>
+    <thead>
+        <tr><th>Key</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Configured shortcut (default <kbd>Ctrl</kbd>+<kbd>L</kbd>)</td><td>Open picker / cycle to next language</td></tr>
+        <tr><td>Release modifier key (e.g. <kbd>Ctrl</kbd>)</td><td>Apply the highlighted language</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Close picker without switching</td></tr>
+        <tr><td>Click language in picker</td><td>Switch immediately</td></tr>
+    </tbody>
+</table>
 
-<footer>
-  <div class="footer-left">
-    <strong>Fast Language Switcher</strong> — Odoo Module
-  </div>
-  <div class="footer-license">LGPL-3 License</div>
-</footer>
+<h2>License</h2>
+<p>This module is released under the <strong>LGPL-3</strong> license.</p>
 
 </body>
 </html>

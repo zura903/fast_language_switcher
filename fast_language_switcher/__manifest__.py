@@ -16,7 +16,7 @@ Features:
   Each press cycles to the next language; auto-applies after 1.5 s of inactivity.
 - Configurable shortcut in Settings > General Settings > Language Switcher.
     """,
-    'author': 'Your Name',
+    'author': 'Zura Mukbaniani',
     'depends': ['web', 'base_setup'],
     'data': [
         'views/res_config_settings_views.xml',

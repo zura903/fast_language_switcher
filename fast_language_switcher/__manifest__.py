@@ -15,7 +15,7 @@
           * Or click any language in the panel to switch instantly
         - Configurable keyboard shortcut in General Settings (Settings → General Settings → Fast Language Switcher)
     """,
-    "author": "Custom",
+    "author": "Zura Mukbaniani",
     "depends": ["web"],
     "data": [
         "views/res_config_settings_views.xml",
